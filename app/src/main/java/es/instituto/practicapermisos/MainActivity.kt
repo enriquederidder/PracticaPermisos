@@ -1,30 +1,23 @@
 package es.instituto.practicapermisos
 
 
+import android.Manifest
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
+import android.graphics.Bitmap
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.widget.Button
 import android.widget.ListView
-import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.toBitmap
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
-import android.Manifest
-import android.graphics.Bitmap
 
 
 class MainActivity : AppCompatActivity() {
@@ -49,6 +42,7 @@ class MainActivity : AppCompatActivity() {
             Manifest.permission.ACCESS_FINE_LOCATION
         )
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -72,13 +66,18 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
     private fun hasAllPermissionsGranted() = REQUIRED_PERMISSIONS.all {
         ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
     }
 
     private fun startCamera() {
         // comprueba si tienen permisos
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             // tiene permiso, lanza la camara
             requestCamera.launch(null)
         } else {
@@ -103,6 +102,7 @@ class MainActivity : AppCompatActivity() {
             requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
         }
     }
+
     private fun configLocation() {
         //el servidor
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
             .setWaitForAccurateLocation(false)
             .setMinUpdateIntervalMillis(500)
             .setMaxUpdateDelayMillis(1000)
-            .build();
+            .build()
         //que se ejecuta cuando se actualiza
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(p0: LocationResult) {
@@ -133,6 +133,7 @@ class MainActivity : AppCompatActivity() {
         adaptador.add(newEntrada)
         adaptador.notifyDataSetChanged()
     }
+
     private fun configRequests() {
         //los dos launcher para permisos y fotografía
         requestPermissionLauncher =
@@ -143,7 +144,8 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         //se abre la cámara
-        requestCamera = registerForActivityResult(ActivityResultContracts.TakePicturePreview()
+        requestCamera = registerForActivityResult(
+            ActivityResultContracts.TakePicturePreview()
         ) {
             it?.let { bitmap ->
                 handleImage(bitmap)
