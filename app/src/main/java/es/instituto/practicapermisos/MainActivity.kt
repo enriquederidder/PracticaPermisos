@@ -24,6 +24,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
 import android.Manifest
+import android.graphics.Bitmap
 
 
 class MainActivity : AppCompatActivity() {
@@ -123,7 +124,15 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
+    private fun handleImage(bitmap: Bitmap) {
+        // coje las coordenadas
+        val currentLocation = lastlocation
+        // crea una nueva entrada
+        val newEntrada = Entrada(bitmap, currentLocation)
+        // mete la nueva entrada en el lisview y lo actualiza
+        adaptador.add(newEntrada)
+        adaptador.notifyDataSetChanged()
+    }
     private fun configRequests() {
         //los dos launcher para permisos y fotografía
         requestPermissionLauncher =
@@ -134,9 +143,11 @@ class MainActivity : AppCompatActivity() {
                 }
             )
         //se abre la cámara
-        requestCamera = registerForActivityResult(ActivityResultContracts.TakePicturePreview(),
-            //se trata la devolucion desde una función anónima
-            {
-            })
+        requestCamera = registerForActivityResult(ActivityResultContracts.TakePicturePreview()
+        ) {
+            it?.let { bitmap ->
+                handleImage(bitmap)
+            }
+        }
     }
 }
