@@ -23,6 +23,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
+import android.Manifest
 
 
 class MainActivity : AppCompatActivity() {
@@ -40,6 +41,13 @@ class MainActivity : AppCompatActivity() {
 
     private var lastlocation: Location? = null
 
+    companion object {
+        private const val PERMISSIONS_REQUEST_CODE = 101
+        private val REQUIRED_PERMISSIONS = arrayOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        )
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -50,15 +58,50 @@ class MainActivity : AppCompatActivity() {
         adaptador = AdaptadorEntrada(this)
 
         findViewById<ListView>(R.id.list_view).adapter = adaptador
-        findViewById<Button>(R.id.b_peticion).setOnClickListener() {
-
-
-
+        findViewById<Button>(R.id.b_peticion).setOnClickListener {
+            // si no tiene permissos lo pregunta
+            if (hasAllPermissionsGranted()) {
+                // ya tiene permisos entonces lanza metodo de camara
+                startCamera()
+                startLocationUpdates()
+            } else {
+                // pregunta permisos
+                requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
+            }
         }
 
-
+    }
+    private fun hasAllPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
     }
 
+    private fun startCamera() {
+        // comprueba si tienen permisos
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            // tiene permiso, lanza la camara
+            requestCamera.launch(null)
+        } else {
+            // notiene permiso, pregunta permisos
+            requestPermissionLauncher.launch(arrayOf(Manifest.permission.CAMERA))
+        }
+    }
+
+    private fun startLocationUpdates() {
+        val hasFineLocationPermission = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (hasFineLocationPermission) {
+            locationRequest?.let { request ->
+                locationCallback?.let { callback ->
+                    fusedLocationClient.requestLocationUpdates(request, callback, null)
+                }
+            }
+        } else {
+            requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+        }
+    }
     private fun configLocation() {
         //el servidor
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
