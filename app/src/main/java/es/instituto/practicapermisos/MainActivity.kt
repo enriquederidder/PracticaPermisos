@@ -35,14 +35,10 @@ class MainActivity : AppCompatActivity() {
 
     private var lastlocation: Location? = null
 
-    companion object {
-        private const val PERMISSIONS_REQUEST_CODE = 101
-        private val REQUIRED_PERMISSIONS = arrayOf(
-            Manifest.permission.CAMERA,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        )
-    }
-
+    private val REQUIRED_PERMISSIONS = arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
