@@ -2,6 +2,7 @@ package es.instituto.practicapermisos
 
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.location.Location
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.CAMERA,
         Manifest.permission.ACCESS_FINE_LOCATION
     )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -50,30 +52,32 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<ListView>(R.id.list_view).adapter = adaptador
         findViewById<Button>(R.id.b_peticion).setOnClickListener {
-            startCamera()
-            startLocationUpdates()
-        }
-    }
-    private fun startCamera() {
-        // comprueba si tienen permisos
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            // tiene permiso, lanza la camara
-            requestCamera.launch(null)
-        } else {
-            // notiene permiso, pregunta permisos
-            requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                startLocationUpdates()
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.CAMERA
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    requestCamera.launch(null)
+
+                } else {
+                    requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
+                }
+            } else {
+                // notiene permiso, pregunta permisos
+                requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
+            }
         }
     }
 
+    @SuppressLint("MissingPermission")
     private fun startLocationUpdates() {
-        val hasFineLocationPermission = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+        // tiene permiso, lanza la camara
         locationRequest?.let { request ->
             locationCallback?.let { callback ->
                 fusedLocationClient.requestLocationUpdates(request, callback, null)
