@@ -50,23 +50,10 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<ListView>(R.id.list_view).adapter = adaptador
         findViewById<Button>(R.id.b_peticion).setOnClickListener {
-            // si no tiene permissos lo pregunta
-            if (hasAllPermissionsGranted()) {
-                // ya tiene permisos entonces lanza metodo de camara
-                startCamera()
-                startLocationUpdates()
-            } else {
-                // pregunta permisos
-                requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
-            }
+            startCamera()
+            startLocationUpdates()
         }
-
     }
-
-    private fun hasAllPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
-    }
-
     private fun startCamera() {
         // comprueba si tienen permisos
         if (ContextCompat.checkSelfPermission(
@@ -78,7 +65,7 @@ class MainActivity : AppCompatActivity() {
             requestCamera.launch(null)
         } else {
             // notiene permiso, pregunta permisos
-            requestPermissionLauncher.launch(arrayOf(Manifest.permission.CAMERA))
+            requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
         }
     }
 
@@ -87,15 +74,10 @@ class MainActivity : AppCompatActivity() {
             this,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
-
-        if (hasFineLocationPermission) {
-            locationRequest?.let { request ->
-                locationCallback?.let { callback ->
-                    fusedLocationClient.requestLocationUpdates(request, callback, null)
-                }
+        locationRequest?.let { request ->
+            locationCallback?.let { callback ->
+                fusedLocationClient.requestLocationUpdates(request, callback, null)
             }
-        } else {
-            requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
         }
     }
 
