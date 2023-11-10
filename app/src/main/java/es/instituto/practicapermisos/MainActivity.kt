@@ -36,50 +36,63 @@ class MainActivity : AppCompatActivity() {
 
     private var lastlocation: Location? = null
 
+    // pone los permisos en un array para
+    // despues poder pedir multiples permisos
     private val REQUIRED_PERMISSIONS = arrayOf(
         Manifest.permission.CAMERA,
         Manifest.permission.ACCESS_FINE_LOCATION
     )
 
+    // Metodo que se llama cuando se crea la actividad
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_main)
 
         this.configLocation()
         this.configRequests()
 
         adaptador = AdaptadorEntrada(this)
-
         findViewById<ListView>(R.id.list_view).adapter = adaptador
+
         findViewById<Button>(R.id.b_peticion).setOnClickListener {
+            // Verifica si tiene permiso de ubicación
             if (ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
+                // Inicia las actualizaciones de ubicación
                 startLocationUpdates()
+
+                // Verifica si tiene el permiso de cámara
                 if (ContextCompat.checkSelfPermission(
                         this,
                         Manifest.permission.CAMERA
                     ) == PackageManager.PERMISSION_GRANTED
                 ) {
+                    // Lanza la camara
                     requestCamera.launch(null)
-
                 } else {
+                    // Lanza la solicitud de permisos
                     requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
                 }
             } else {
-                // notiene permiso, pregunta permisos
+                // Lanza la solicitud de permisos si no tiene el permiso de ubicación
                 requestPermissionLauncher.launch(REQUIRED_PERMISSIONS)
             }
         }
     }
 
+    // ya que antes de iniciar actualizaciones de ubicacion
+    // compruebo si tengo permisos, no lo pregunto otra vez aqui
     @SuppressLint("MissingPermission")
     private fun startLocationUpdates() {
-        // tiene permiso, lanza la camara
+        // Verifica si la solicitud de ubicación y el callback no son nulos
         locationRequest?.let { request ->
             locationCallback?.let { callback ->
+                // Si no son nulos, solicita actualizaciones
+                // de ubicación al cliente de ubicación fusionada
                 fusedLocationClient.requestLocationUpdates(request, callback, null)
             }
         }
